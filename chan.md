@@ -14,6 +14,7 @@ cs: = make (chan * os.File, 100) // буферизованный канал ук
 Есть много хороших идиом, использующих каналы. Вот один, чтобы начать нас. В предыдущем разделе мы запустили сортировку в фоновом режиме. Канал может позволить запускающей программе ожидать завершения сортировки.
 
 ```golang
+
 c: = make (chan int) // Выделить канал.
 // Запускаем сортировку в goroutine; когда это завершится, сигнал на канале.
 go func () {
@@ -78,13 +79,13 @@ func Serve (очередь chan * Request) {
 Вот один из способов сделать это, передав значение reqв качестве аргумента замыканию в программе:
 
 ```golang
-func Serve (очередь chan * Request) {
-    для req: = дальность очереди {
-        сем <- 1
-        go func (req * Request) {
-            Процесс (REQ)
+func Serve(queue chan *Request) {
+    for req := range queue {
+        sem <- 1
+        go func() {
+            process(req) // Buggy; see explanation below.
             <-sem
-        } (REQ)
+        }()
     }
 }
 ```
@@ -118,18 +119,28 @@ req: = req
 после запуска goroutines он блокирует прием с этого канала.
 
 ```golang
-дескриптор func (очередь chan * Request) {
-    для r: = очередь диапазона {
-        Процесс (г)
+func Serve(queue chan *Request) {
+    for req := range queue {
+        sem <- 1
+        go func(req *Request) {
+            process(req)
+            <-sem
+        }(req)
     }
 }
+```
+Сравните эту версию с предыдущей, чтобы увидеть разницу в том, как закрытие объявляется и выполняется. Другое решение - просто создать новую переменную с тем же именем, как в этом примере:
 
-func Serve (clientRequests chan * Request, выйти из chan bool) {
-    // Запускать обработчики
-    для i: = 0; я <MaxOutstanding; я ++ {
-        go handle (clientRequests)
+```golang
+func Serve(queue chan *Request) {
+    for req := range queue {
+        req := req // Create new instance of req for the goroutine.
+        sem <- 1
+        go func() {
+            process(req)
+            <-sem
+        }()
     }
-    <-quit // Дождаться, чтобы получить сообщение о выходе.
 }
 ```
 
