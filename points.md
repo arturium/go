@@ -40,6 +40,165 @@ p =  <nil>
 
 ```
 
+## Инициализация указателя
+Вы можете инициализировать указатель с адресом памяти другой переменной. Адрес переменной можно получить с помощью &оператора -
+```
+var x = 100
+var p *int = &x
+```
 
+Обратите внимание, как мы используем &оператор с переменной, xчтобы получить ее адрес, а затем назначаем адрес указателю p.
 
+Как и любая другая переменная в Golang, тип переменной-указателя также определяется компилятором. Таким образом, вы можете опустить объявление типа из указателя pв приведенном выше примере и написать его так:
+
+var p = &a
+Давайте посмотрим полный пример, чтобы прояснить ситуацию -
+
+```golang
+package main
+import "fmt"
+
+func main() {
+	var a = 5.67
+	var p = &a
+
+	fmt.Println("Value stored in variable a = ", a)
+	fmt.Println("Address of variable a = ", &a)
+	fmt.Println("Value stored in variable p = ", p)
+}
+```
+
+# Output
+Value stored in variable a =  5.67
+Address of variable a =  0xc4200120a8
+Value stored in variable p =  0xc4200120a8
+Разыменование указателя
+Вы можете использовать *оператор указателя для доступа к значению, хранящемуся в переменной, на которую указывает указатель. Это называется разыменованием или indirecting -
+
+```golang
+package main
+import "fmt"
+
+func main() {
+	var a = 100
+	var p = &a
+
+	fmt.Println("a = ", a)
+	fmt.Println("p = ", p)
+	fmt.Println("*p = ", *p)
+}
+# Output
+a =  100
+p =  0xc4200120a8
+*p =  100
+```
+
+Вы можете не только получить доступ к значению указанной переменной с помощью *оператора, но и изменить его. Следующий пример устанавливает значение , сохраненное в переменной aчерез указатель p-
+
+```golang
+package main
+import "fmt"
+
+func main() {
+	var a = 1000
+	var p = &a
+
+	fmt.Println("a (before) = ", a)
+
+	// Changing the value stored in the pointed variable through the pointer
+	*p = 2000
+
+	fmt.Println("a (after) = ", a)
+}
+```
+
+# Output
+a (before) =  1000
+a (after) =  2000
+
+## Создание указателя с помощью встроенной функции new ()
+Вы также можете создать указатель, используя встроенную new()функцию. new()Функция принимает тип в качестве аргумента, выделяет достаточно памяти для размещения значения этого типа, и возвращает указатель на него.
+
+Вот пример -
+
+```golang
+package main
+
+import "fmt"
+
+func main() {
+	ptr := new(int) // Pointer to an `int` type
+	*ptr = 100
+
+	fmt.Printf("Ptr = %#x, Ptr value = %d\n", ptr, *ptr)
+}
+```
+
+# Output
+Ptr = 0xc420014058, Ptr value = 100
+Указатель на указатель
+Указатель может указывать на переменную любого типа. Он может указывать и на другой указатель. В следующем примере показано, как создать указатель на другой указатель -
+
+```golang
+package main
+import "fmt"
+
+func main() {
+	var a = 7.98
+	var p = &a
+	var pp = &p
+
+	fmt.Println("a = ", a)
+	fmt.Println("address of a = ", &a)
+
+	fmt.Println("p = ", p)
+	fmt.Println("address of p = ", &p)
+
+	fmt.Println("pp = ", pp)
+
+	// Dereferencing a pointer to pointer
+	fmt.Println("*pp = ", *pp)
+	fmt.Println("**pp = ", **pp)
+}
+```
+
+# Output
+a =  7.98
+address of a =  0xc4200120a8
+p =  0xc4200120a8
+address of p =  0xc42000c028
+pp =  0xc42000c028
+*pp =  0xc4200120a8
+**pp =  7.98
+Нет арифметики указателей в го
+Если вы работали с C / C ++, вы должны знать, что эти языки поддерживают арифметику указателей. Например, вы можете увеличить / уменьшить указатель, чтобы перейти к следующему / предыдущему адресу памяти. Вы можете добавить или вычесть целое значение в / из указателя. Вы также можете сравнить два указателя с использованием реляционных операторов ==, <, и >т.д.
+
+Но Go не поддерживает такие арифметические операции над указателями. Любая такая операция приведет к ошибке времени компиляции -
+
+```golang
+package main
+
+func main() {
+	var x = 67
+	var p = &x
+
+	var p1 = p + 1 // Compiler Error: invalid operation
+}
+```
+
+Однако вы можете сравнить два указателя одного типа на равенство, используя ==оператор.
+```golang
+package main
+import "fmt"
+
+func main() {
+	var a = 75
+	var p1 = &a
+	var p2 = &a
+
+	if p1 == p2 {
+		fmt.Println("Both pointers p1 and p2 point to the same variable.")
+	}
+}
+```
 
